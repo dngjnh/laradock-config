@@ -46,9 +46,9 @@ Laradock 环境配置。
 - Workspace Node / NVM 配置
 
   ```
-  WORKSPACE_NVM_NODEJS_ORG_MIRROR="http://npm.taobao.org/mirrors/node"
+  WORKSPACE_NVM_NODEJS_ORG_MIRROR=http://npm.taobao.org/mirrors/node
   WORKSPACE_INSTALL_NODE=false
-  WORKSPACE_NPM_REGISTRY="https://registry.npm.taobao.org"
+  WORKSPACE_NPM_REGISTRY=https://registry.npm.taobao.org
   WORKSPACE_INSTALL_YARN=false
   ```
 
