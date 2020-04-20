@@ -40,7 +40,7 @@ Laradock 环境配置。
 - Workspace Composer 配置
 
   ```
-  WORKSPACE_COMPOSER_REPO_PACKAGIST="https://mirrors.aliyun.com/composer/"
+  WORKSPACE_COMPOSER_REPO_PACKAGIST=https://mirrors.aliyun.com/composer/
   ```
 
 - Workspace Node / NVM 配置
