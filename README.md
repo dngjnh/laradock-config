@@ -140,3 +140,49 @@ WORKSPACE_INSTALL_AST=false
   `docker-compose build` 的过程中，灵活切换是否使用代理，可增加成功的机率。`docker-compose up` 的过程中，也可以通过再次 `docker-compose build` 快速改变配置参数。
 
 - 建议替换 Workspace 里面的 insecure_id_rsa、insecure_id_rsa.pub 为自己的 ssh key。
+
+- 如果安装 `phpredis` 过程中提示 `Package "phpredis" does not have REST info xml available` 或其他错误，尝试修改 `php-fpm/Dockerfile` 中的 `PHP REDIS EXTENSION` 模块如下（去 pecl.php.net 查询包的下载地址）：
+
+  ```
+  ###########################################################################
+  # PHP REDIS EXTENSION
+  ###########################################################################
+  
+  ARG INSTALL_PHPREDIS=false
+  
+  RUN if [ ${INSTALL_PHPREDIS} = true ]; then \
+      # Install Php Redis Extension
+      if [ $(php -r "echo PHP_MAJOR_VERSION;") = "5" ]; then \
+        pecl install -o -f redis-4.3.0; \
+      else \
+        pecl install -o -f https://pecl.php.net/get/redis-5.2.1.tgz; \
+      fi \
+      && rm -rf /tmp/pear \
+      && docker-php-ext-enable redis \
+  ;fi
+  ```
+
+  或下载包到 php-fpm 目录下，修改 `Dockerfile` 内容如下：
+
+  ```
+  ###########################################################################
+  # PHP REDIS EXTENSION
+  ###########################################################################
+  
+  ARG INSTALL_PHPREDIS=false
+
+  COPY redis-5.2.1.tgz /tmp
+  
+  RUN if [ ${INSTALL_PHPREDIS} = true ]; then \
+      # Install Php Redis Extension
+      if [ $(php -r "echo PHP_MAJOR_VERSION;") = "5" ]; then \
+        pecl install -o -f redis-4.3.0; \
+      else \
+        pecl install -o -f /tmp/redis-5.2.1.tgz; \
+      fi \
+      && rm -rf /tmp/pear \
+      && docker-php-ext-enable redis \
+  ;fi
+  ```
+
+  其他 pecl 包同理。
