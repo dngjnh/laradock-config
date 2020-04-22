@@ -137,6 +137,6 @@ WORKSPACE_INSTALL_AST=false
     workspace
   ```
 
-  `build` 的过程中，灵活切换是否使用代理，可增加成功的机率。
+  `docker-compose build` 的过程中，灵活切换是否使用代理，可增加成功的机率。`docker-compose up` 的过程中，也可以通过再次 `docker-compose build` 快速改变配置参数。
 
 - 建议替换 Workspace 里面的 insecure_id_rsa、insecure_id_rsa.pub 为自己的 ssh key。
