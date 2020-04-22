@@ -88,7 +88,7 @@ Laradock 环境配置。
   MYSQL_VERSION=5.7
   ```
 
-如果在安装 PPA 仓库的软件出错，则使用中科大的 PPA 加速，编辑 `workspace/Dockerfile` 中的片段如下（第 3 行）：
+如果在安装 PPA 仓库的软件出错，则使用中科大的 PPA 加速，编辑 `workspace/Dockerfile` 、`php-fpm/Dockerfile` 中的片段如下（第 3 行）：
 
 ```
 # always run apt update when start and after add new source list, then clean up at end.
