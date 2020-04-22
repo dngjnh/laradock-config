@@ -47,9 +47,9 @@ Laradock 环境配置。
 
   ```
   WORKSPACE_NVM_NODEJS_ORG_MIRROR=http://npm.taobao.org/mirrors/node
-  WORKSPACE_INSTALL_NODE=false
+  WORKSPACE_INSTALL_NODE=true
   WORKSPACE_NPM_REGISTRY=https://registry.npm.taobao.org
-  WORKSPACE_INSTALL_YARN=false
+  WORKSPACE_INSTALL_YARN=true
   ```
 
 - Workspace SSH
@@ -128,11 +128,15 @@ WORKSPACE_INSTALL_AST=false
 
 ## 其他
 
-构建镜像时使容器通过代理上网，例子：
+- 构建镜像时使容器通过代理上网，例子：
 
-```bash
-$ docker-compose build \
-  --build-arg http_proxy=socks5://host.docker.internal:1080 \
-  --build-arg https_proxy=socks5://host.docker.internal:1080 \
-  workspace
-```
+  ```bash
+  $ docker-compose build \
+    --build-arg http_proxy=socks5://host.docker.internal:1080 \
+    --build-arg https_proxy=socks5://host.docker.internal:1080 \
+    workspace
+  ```
+
+  `build` 的过程中，灵活切换是否使用代理，可增加成功的机率。
+
+- 建议替换 Workspace 里面的 insecure_id_rsa、insecure_id_rsa.pub 为自己的 ssh key。
