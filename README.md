@@ -19,7 +19,7 @@ Laradock 环境配置。
 
   ```
   ### Environment ###########################################
-  
+
   # If you need to change the sources (i.e. to China), set CHANGE_SOURCE to true
   CHANGE_SOURCE=true
   # Set CHANGE_SOURCE and UBUNTU_SOURCE option if you want to change the Ubuntu system sources.list file.
@@ -81,9 +81,9 @@ Laradock 环境配置。
   ###########################################################################
   # PHP REDIS EXTENSION
   ###########################################################################
-  
+
   ARG INSTALL_PHPREDIS=false
-  
+
   RUN if [ ${INSTALL_PHPREDIS} = true ]; then \
       # Install Php Redis Extension
       if [ $(php -r "echo PHP_MAJOR_VERSION;") = "5" ]; then \
@@ -102,13 +102,13 @@ Laradock 环境配置。
   ###########################################################################
   # PHP REDIS EXTENSION
   ###########################################################################
-  
+
   ARG INSTALL_PHPREDIS=false
 
   ARG REDIS_INSTALL_VERSION=5.2.1
 
   COPY redis-${REDIS_INSTALL_VERSION}.tgz /tmp/redis-${REDIS_INSTALL_VERSION}.tgz
-  
+
   RUN if [ ${INSTALL_PHPREDIS} = true ]; then \
       # Install Php Redis Extension
       if [ $(php -r "echo PHP_MAJOR_VERSION;") = "5" ]; then \
@@ -146,11 +146,36 @@ Laradock 环境配置。
 
 4. `cp env.example .env`
 
-5. 编辑 `.env` 文件：
+5. 编辑 `docker-compose.yml` 文件，修改 `RabbitMQ` 的 `volumes`：
+
+   ```
+   ### RabbitMQ #############################################
+       rabbitmq:
+         build: ./rabbitmq
+         ports:
+           - "${RABBITMQ_NODE_HOST_PORT}:5672"
+           - "${RABBITMQ_MANAGEMENT_HTTP_HOST_PORT}:15672"
+           - "${RABBITMQ_MANAGEMENT_HTTPS_HOST_PORT}:15671"
+         privileged: true
+         environment:
+           - RABBITMQ_DEFAULT_USER=${RABBITMQ_DEFAULT_USER}
+           - RABBITMQ_DEFAULT_PASS=${RABBITMQ_DEFAULT_PASS}
+         hostname: laradock-rabbitmq
+         volumes:
+           - ${DATA_PATH_HOST}/rabbitmq:/var/lib/rabbitmq/mnesia
+         depends_on:
+           - php-fpm
+         networks:
+           - backend
+   ```
+
+6. 编辑 `.env` 文件：
 
    WORKSPACE：
 
    `APP_CODE_PATH_HOST=../projects/`
+
+   `DATA_PATH_HOST=../.laradock/data`
 
    `PHP_VERSION=7.2`
 
@@ -186,7 +211,7 @@ Laradock 环境配置。
 
    `PHP_WORKER_INSTALL_SWOOLE=true`
 
-6. 复制 SSH key 到 workspace 下
+7. 复制 SSH key 到 workspace 下
 
    ```bash
    $ cp ~/.ssh/id_rsa workspace/insecure_id_rsa
@@ -196,7 +221,7 @@ Laradock 环境配置。
    $ cp ~/.ssh/id_rsa.pub workspace/insecure_id_rsa.pub
    ```
 
-7. 使用中科大的 PPA 加速，编辑 `workspace/Dockerfile` 中的片段如下（第 3 行）：
+8. 使用中科大的 PPA 加速，编辑 `workspace/Dockerfile` 中的片段如下（第 3 行）：
 
    ```
    # always run apt update when start and after add new source list, then clean up at end.
@@ -228,15 +253,15 @@ Laradock 环境配置。
          php -m | grep -q 'zip'
    ```
 
-8. 下载指定版本的 `Swoole` 包到 `workspace` 目录下，并编辑 `workspace/Dockerfile` 内容片段如下：
+9. 下载指定版本的 `Swoole` 包到 `workspace` 目录下，并编辑 `workspace/Dockerfile` 内容片段如下：
 
    ```
    ###########################################################################
    # Swoole EXTENSION
    ###########################################################################
-   
+
    ARG INSTALL_SWOOLE=false
-   
+
    ARG SWOOLE_INSTALL_VERSION_1=2.0.10
    ARG SWOOLE_INSTALL_VERSION_2=2.2.0
    ARG SWOOLE_INSTALL_VERSION_3=4.4.18
@@ -245,7 +270,7 @@ Laradock 环境配置。
    COPY swoole-${SWOOLE_INSTALL_VERSION_2}.tgz /tmp/swoole-${SWOOLE_INSTALL_VERSION_2}.tgz
    # 替换成当前最新版本
    COPY swoole-${SWOOLE_INSTALL_VERSION_3}.tgz /tmp/swoole-${SWOOLE_INSTALL_VERSION_3}.tgz
-   
+
    RUN if [ ${INSTALL_SWOOLE} = true ]; then \
        # Install Php Swoole Extension
        if [ $(php -r "echo PHP_MAJOR_VERSION;") = "5" ]; then \
@@ -263,29 +288,29 @@ Laradock 环境配置。
    ;fi
    ```
 
-9. 下载 `WORKSPACE_AST_VERSION` 指定的 `AST` 包到 `workspace` 目录下，并编辑 `workspace/Dockerfile` 内容片段如下：
+10. 下载 `WORKSPACE_AST_VERSION` 指定的 `AST` 包到 `workspace` 目录下，并编辑 `workspace/Dockerfile` 内容片段如下：
 
-   ```
-   ###########################################################################
-   # AST EXTENSION
-   ###########################################################################
-   
-   ARG INSTALL_AST=false
-   ARG AST_VERSION=1.0.3
-   ENV AST_VERSION ${AST_VERSION}
-   
-   COPY ast-${AST_VERSION}.tgz /tmp/ast-${AST_VERSION}.tgz
-   
-   RUN if [ ${INSTALL_AST} = true ]; then \
-       # AST extension requires PHP 7.0.0 or newer
-       if [ $(php -r "echo PHP_MAJOR_VERSION;") != "5" ]; then \
-           # Install AST extension
-           printf "\n" | pecl -q install /tmp/ast-${AST_VERSION}.tgz && \
-           echo "extension=ast.so" >> /etc/php/${LARADOCK_PHP_VERSION}/mods-available/ast.ini && \
-           phpenmod -v ${LARADOCK_PHP_VERSION} -s cli ast \
-       ;fi \
-   ;fi
-   ```
+    ```
+    ###########################################################################
+    # AST EXTENSION
+    ###########################################################################
+
+    ARG INSTALL_AST=false
+    ARG AST_VERSION=1.0.3
+    ENV AST_VERSION ${AST_VERSION}
+
+    COPY ast-${AST_VERSION}.tgz /tmp/ast-${AST_VERSION}.tgz
+
+    RUN if [ ${INSTALL_AST} = true ]; then \
+        # AST extension requires PHP 7.0.0 or newer
+        if [ $(php -r "echo PHP_MAJOR_VERSION;") != "5" ]; then \
+            # Install AST extension
+            printf "\n" | pecl -q install /tmp/ast-${AST_VERSION}.tgz && \
+            echo "extension=ast.so" >> /etc/php/${LARADOCK_PHP_VERSION}/mods-available/ast.ini && \
+            phpenmod -v ${LARADOCK_PHP_VERSION} -s cli ast \
+        ;fi \
+    ;fi
+    ```
 
 ### php-fpm
 
@@ -327,7 +352,7 @@ Laradock 环境配置。
    ###########################################################################
    # PHP REDIS EXTENSION
    ###########################################################################
-   
+
    ARG INSTALL_PHPREDIS=false
 
    ARG REDIS_INSTALL_VERSION_1=4.3.0
@@ -335,7 +360,7 @@ Laradock 环境配置。
 
    COPY redis-${REDIS_INSTALL_VERSION_1}.tgz /tmp/redis-${REDIS_INSTALL_VERSION_1}.tgz
    COPY redis-${REDIS_INSTALL_VERSION_2}.tgz /tmp/redis-${REDIS_INSTALL_VERSION_2}.tgz
-   
+
    RUN if [ ${INSTALL_PHPREDIS} = true ]; then \
        # Install Php Redis Extension
        if [ $(php -r "echo PHP_MAJOR_VERSION;") = "5" ]; then \
@@ -354,18 +379,18 @@ Laradock 环境配置。
    ###########################################################################
    # Swoole EXTENSION
    ###########################################################################
-   
+
    ARG INSTALL_SWOOLE=false
-   
+
    ARG SWOOLE_INSTALL_VERSION_1=2.0.10
    ARG SWOOLE_INSTALL_VERSION_2=2.2.0
    ARG SWOOLE_INSTALL_VERSION_3=4.4.18
-   
+
    COPY swoole-${SWOOLE_INSTALL_VERSION_1}.tgz /tmp/swoole-${SWOOLE_INSTALL_VERSION_1}.tgz
    COPY swoole-${SWOOLE_INSTALL_VERSION_2}.tgz /tmp/swoole-${SWOOLE_INSTALL_VERSION_2}.tgz
    # 替换成当前最新版本
    COPY swoole-${SWOOLE_INSTALL_VERSION_3}.tgz /tmp/swoole-${SWOOLE_INSTALL_VERSION_3}.tgz
-   
+
    RUN if [ ${INSTALL_SWOOLE} = true ]; then \
        # Install Php Swoole Extension
        if [ $(php -r "echo PHP_MAJOR_VERSION;") = "5" ]; then \
@@ -388,15 +413,15 @@ Laradock 环境配置。
    ###########################################################################
    # ImageMagick:
    ###########################################################################
-   
+
    USER root
-   
+
    ARG INSTALL_IMAGEMAGICK=false
-   
+
    ARG IMAGICK_INSTALL_VERSION=3.4.4
-   
+
    COPY imagick-${IMAGICK_INSTALL_VERSION}.tgz /tmp
-   
+
    RUN if [ ${INSTALL_IMAGEMAGICK} = true ]; then \
        apt-get install -y libmagickwand-dev imagemagick && \
        pecl install /tmp/imagick-${IMAGICK_INSTALL_VERSION}.tgz && \
@@ -412,11 +437,11 @@ Laradock 环境配置。
    ARG MEMCACHED_INSTALL_VERSION=3.1.5
    ARG MCRYPT_INSTALL_VERSION=1.0.1
    ARG MONGODB_INSTALL_VERSION=1.7.4
-   
+
    COPY memcached-${MEMCACHED_INSTALL_VERSION}.tgz /tmp/memcached-${MEMCACHED_INSTALL_VERSION}.tgz
    COPY mcrypt-${MCRYPT_INSTALL_VERSION}.tgz /tmp/mcrypt-${MCRYPT_INSTALL_VERSION}.tgz
    COPY mongodb-${MONGODB_INSTALL_VERSION}.tgz /tmp/mongodb-${MONGODB_INSTALL_VERSION}.tgz
-   
+
    RUN pecl channel-update pecl.php.net \
      && pecl install /tmp/memcached-${MEMCACHED_INSTALL_VERSION}.tgz /tmp/mcrypt-${MCRYPT_INSTALL_VERSION}.tgz /tmp/mongodb-${MONGODB_INSTALL_VERSION}.tgz \
      && docker-php-ext-enable memcached mongodb
@@ -428,16 +453,16 @@ Laradock 环境配置。
    ###########################################################################
    # Swoole EXTENSION
    ###########################################################################
-   
+
    ARG INSTALL_SWOOLE=false
-   
+
    ARG SWOOLE_LATEST_VERSION=4.4.18
-   
+
    COPY swoole-2.0.10.tgz /tmp/swoole-2.0.10.tgz
    COPY swoole-2.2.0.tgz /tmp/swoole-2.2.0.tgz
    # 替换成当前最新版本
    COPY swoole-${SWOOLE_LATEST_VERSION}.tgz /tmp/swoole-${SWOOLE_LATEST_VERSION}.tgz
-   
+
    RUN if [ ${INSTALL_SWOOLE} = true ]; then \
        # Install Php Swoole Extension
        if [ $(php -r "echo PHP_MAJOR_VERSION;") = "5" ]; then \
