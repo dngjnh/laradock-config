@@ -1,4 +1,4 @@
-# laradock-env
+# laradock-config
 
 ## 目录
 
