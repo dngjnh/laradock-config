@@ -138,7 +138,7 @@ Laradock 环境配置。
 
 ### workspace
 
-1. `cd ~/workspace`
+1. `cd ~/Development`
 
 2. `git clone git clone https://github.com/Laradock/laradock.git`
 
@@ -173,7 +173,7 @@ Laradock 环境配置。
 
    WORKSPACE：
 
-   `APP_CODE_PATH_HOST=../projects/`
+   `APP_CODE_PATH_HOST=../.laradock/projects/`
 
    `DATA_PATH_HOST=../.laradock/data`
 
